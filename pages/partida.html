@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset='utf-8'>
+	<meta http-equiv='X-UA-Compatible' content='IE=edge'>
+	<title>Page Title</title>
+	<meta name='viewport' content='width=device-width, initial-scale=1'>
+	<!-- <link rel="stylesheet" href="./index.css"> -->
+
+</head>
+
+<body>
+	<div id="messagebox">
+	</div>
+
+	<div id="partida" class="partida">
+		<style>
+			/* Estilo CSS para o layout do jogo */
+			body {
+				font-family: 'Arial', sans-serif;
+				background-color: #f4f4f4;
+				margin: 0;
+				padding: 0;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				height: 100vh;
+
+			}
+
+			.container {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				background-color: #fff;
+				padding: 20px;
+				border-radius: 8px;
+				box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+			}
+
+			h1 {
+				color: #333;
+			}
+
+			.board-container {
+				display: flex;
+				margin-top: 20px;
+			}
+
+			/* Estilos específicos para dispositivos com largura de tela até 600 pixels (ajuste conforme necessário) */
+			@media screen and (max-width: 600px) {
+				.board-container {
+					margin-top: 10px;
+					display: flex;
+					flex-direction: column;
+				}
+			}
+
+
+			.board {
+				display: grid;
+				grid-template-columns: repeat(5, 1fr);
+				gap: 10px;
+				margin: 20px;
+			}
+
+			.square {
+				width: 50px;
+				height: 50px;
+				border: 1px solid #000;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 1.2em;
+				cursor: pointer;
+			}
+
+			.selected {
+				background-color: #f81804;
+				color: white;
+			}
+
+			.disabled {
+				pointer-events: none;
+				background-color: #4caf50;
+				color: white;
+				pointer-events: none;
+			}
+
+			.input-nome-jogador {
+				display: flex;
+				/* Inicialmente oculta */
+				flex-direction: column;
+				/* Alterado para column para alinhar os itens verticalmente */
+				align-items: center;
+				/* Centraliza os itens horizontalmente */
+			}
+
+			.caixa_de_sorteio {
+				display: none;
+				/* Inicialmente oculta */
+				flex-direction: column;
+				/* Alterado para column para alinhar os itens verticalmente */
+				align-items: center;
+				/* Centraliza os itens horizontalmente */
+				margin-left: 10px;
+			}
+
+			#sinal-sorteado {
+				flex-direction: column;
+				/* Alterado para column para alinhar os itens verticalmente */
+				align-items: center;
+			}
+
+			#sorteio {
+				display: flex;
+				flex-direction: column;
+				/* Alterado para column para alinhar os itens verticalmente */
+				align-items: center;
+				/* Centraliza os itens horizontalmente */
+				justify-content: center;
+			}
+
+			input {
+				background-color: #dbecdb;
+				color: rgb(18, 17, 17);
+				padding: 10px 20px;
+				font-size: 16px;
+				margin-top: 10px;
+				cursor: pointer;
+				border: none;
+				border-radius: 4px;
+				display: flex;
+				align-items: center;
+				/* Centraliza o texto verticalmente */
+			}
+
+			button {
+				background-color: #4caf50;
+				color: white;
+				padding: 10px 20px;
+				font-size: 16px;
+				margin-top: 10px;
+				cursor: pointer;
+				border: none;
+				border-radius: 4px;
+				display: flex;
+				align-items: center;
+				/* Centraliza o texto verticalmente */
+			}
+
+			button:hover {
+				background-color: #45a049;
+			}
+		</style>
+		<!-- Conteúdo principal do jogo -->
+		<div class="container">
+			<!-- Título do jogo -->
+			<h1>Bingo em Libras</h1>
+			<h4 id="nome-jogador"></h4>
+
+			<!-- Container para o globo e o quadro do Bingo -->
+			<div class="board-container">
+				<!-- Globo de Bingo -->
+				<div class="caixa_de_sorteio" id="caixa_de_sorteio">
+					<div>
+						<button id="iniciarSorteioButton" onclick={iniciarSorteio()}>Iniciar jogo</button>
+					</div>
+					<div id="sinal-sorteado">
+						<h1>Sinal Sorteado</h1>
+						<div id="sorteio">
+						</div>
+					</div>
+					<div>
+						<button id="bingoButton" onclick={bingo()}>BINGO!</button>
+					</div>
+				</div>
+				<div id="bingo-board" class="board" onclick="selecionarSinal(event)"></div>
+
+			</div>
+		</div>
+		<!-- Script para a lógica do jogo e o uso do plugin SweetAlert2 -->
+		<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+		<script>
+			const events = new EventSource(`http://localhost:5000/events`);
+
+			const idxSinalSorteado = [];
+			let sinalSorteado = "";
+
+
+			events.addEventListener('notiticacao', (data) => {
+				console.log(data);
+				const messagebox = JSON.parse(data.data);
+				console.log(messagebox);
+				if (messagebox.number) {
+					sinalSorteado = messagebox.number;
+					if (messagebox.number) {
+						idxSinalSorteado.unshift(parseInt(messagebox.number));
+					}
+
+					// Obtém o elemento div pelo ID e define o conteúdo HTML
+					document.getElementById('sorteio').innerHTML = JSON.stringify(sinalSorteado);
+
+					// document.getElementById('messagebox').innerHTML = JSON.stringify(messagebox.msg);
+				} if (messagebox.msg) {
+					// Obtém o elemento div pelo ID e define o conteúdo HTML
+					document.getElementById('sorteio').textContent = '';
+					exibirMensagem(messagebox.msg, messagebox.jogador);
+					gerarCartela();
+					idxSinalSorteado = [];
+					sinalSorteado = "";
+
+				}
+			})
+
+			function iniciarSorteio() {
+				fetch('http://localhost:5000/iniciar_sorteio', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						// Pode ser necessário adicionar outros cabeçalhos, dependendo dos requisitos do seu servidor
+					},
+					body: JSON.stringify({
+						// Se precisar enviar dados no corpo da requisição, adicione-os aqui
+					}),
+				})
+					.then(response => {
+						if (!response.ok) {
+							throw new Error('Erro ao iniciar o sorteio');
+						}
+						// Remove display none da caixa de sorteio
+						document.getElementById('iniciarSorteioButton').style.display = 'none';
+						console.log('Sorteio iniciado com sucesso!');
+					})
+					.catch(error => {
+						console.error('Erro:', error.message);
+					});
+			}
+
+			function bingo() {
+				// Converte o Set numerosCartela em um array
+				const arrayNumerosCartela = Array.from(numerosCartela);
+
+				// Verifica se todos os elementos do arrayNumerosCartela estão no idxSinalSorteado
+				const cartelaCompleta = arrayNumerosCartela.every(numero => idxSinalSorteado.includes(numero));
+				if (!cartelaCompleta) {
+					return exibirMensagemError('Selecione todos os números da cartela')
+				}
+				fetch('http://localhost:5000/bingo', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						// Pode ser necessário adicionar outros cabeçalhos, dependendo dos requisitos do seu servidor
+					},
+					body: JSON.stringify({
+						// Se precisar enviar dados no corpo da requisição, adicione-os aqui
+						nomeJogador
+					}),
+				})
+					.then(response => {
+						if (!response.ok) {
+							throw new Error('Erro no Bingo');
+						}
+						// Remove display none da caixa de sorteio
+						console.log('Bingo com sucesso!');
+					})
+					.catch(error => {
+						console.error('Erro:', error.message);
+					});
+			}
+			//Numeros da tabela
+			const numerosCartela = new Set();
+
+			// Obtém o nome do localStorage
+			const nomeJogador = localStorage.getItem('nome-jogador');
+			console.log(nomeJogador);
+			document.getElementById('nome-jogador').innerText = `Jogador: ${nomeJogador}`;
+
+			// Função para gerar uma nova cartela de Bingo
+			function gerarCartela() {
+				// Obtém o elemento do quadro do Bingo
+				const bingoBoard = document.getElementById('bingo-board');
+				// Limpa o conteúdo do quadro e reinicia as variáveis
+				bingoBoard.innerHTML = '';
+
+
+				// Preenche o quadro do Bingo com sinais aleatórios
+				for (let i = 0; i < 25; i++) {
+					const square = document.createElement('div');
+					square.classList.add('square');
+					square.textContent = gerarSinalUnico();
+					bingoBoard.appendChild(square);
+				}
+
+				// Remove display none da caixa de sorteio
+				document.getElementById('caixa_de_sorteio').style.display = 'flex';
+			}
+
+			// Função para gerar um sinal que ainda não foi sorteado
+			function gerarSinalUnico() {
+				const maxIndex = 75;
+				const todosOsNumeros = Array.from({ length: maxIndex }, (_, i) => i);
+				const numerosDisponiveis = todosOsNumeros.filter(num => !numerosCartela.has(num));
+
+				if (numerosDisponiveis.length === 0) {
+					reiniciarSorteio();
+				}
+
+				const indexSorteado = numerosDisponiveis[Math.floor(Math.random() * numerosDisponiveis.length)];
+				numerosCartela.add(indexSorteado);
+
+				return indexSorteado;
+			}
+
+			gerarCartela();
+
+			// Função para desabilitar a seleção no quadro do Bingo
+			function desabilitarSelecaoAtual() {
+				const selectedSquare = document.querySelector('.selected');
+				if (selectedSquare) {
+					selectedSquare.classList.add('disabled');
+				}
+			}
+
+			// Função para selecionar um sinal no quadro do Bingo
+			function selecionarSinal(event) {
+				// Verifica se já foi sorteado um sinal
+				if (!sinalSorteado) {
+					exibirMensagemError('Aviso', 'Nenhum sinal sorteado, aguarde o inicio do sorteio.');
+					return;
+				}
+
+				// Obtém o quadrado clicado
+				const clickedSquare = event.target;
+				// Verifica se é um quadrado e não está desabilitado
+				if (clickedSquare.classList.contains('square') && !clickedSquare.classList.contains('disabled')) {
+					// Obtém o quadrado previamente selecionado
+					const selectedSquare = document.querySelector('.selected');
+					if (selectedSquare) {
+						// Remove a seleção do quadrado previamente selecionado
+						selectedSquare.classList.remove('selected');
+					}
+
+					// Adiciona a seleção ao quadrado clicado
+					clickedSquare.classList.add('selected');
+
+
+					// Obtém o sinal selecionado
+					const selectedSinal = clickedSquare.textContent;
+					// Verifica se o sinal selecionado é igual ao sorteado
+					console.log("selecionou:", parseInt(selectedSinal), "sorteado:", parseInt(idxSinalSorteado[0]));
+					if (idxSinalSorteado.includes(parseInt(selectedSinal))) {
+						// Desabilita a seleção atual no quadro do Bingo
+						desabilitarSelecaoAtual();
+					}
+
+				}
+			}
+
+			// Função para exibir uma mensagem modal usando o plugin SweetAlert2
+			function exibirMensagem(titulo, mensagem) {
+				Swal.fire({
+					title: titulo,
+					html: mensagem,
+					icon: 'success',
+					timer: 2000,
+					timerProgressBar: true,
+					showConfirmButton: false
+				});
+			}
+
+			// Função para exibir uma mensagem de erro modal
+			function exibirMensagemError(titulo, mensagem) {
+				Swal.fire({
+					title: titulo,
+					html: mensagem,
+					icon: 'error',
+					timer: 2000,
+					timerProgressBar: true,
+					showConfirmButton: false
+				});
+			}
+
+		</script>
+	</div>
+</body>
+
+</html>
