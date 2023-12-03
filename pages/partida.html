@@ -183,7 +183,10 @@
 		<!-- Script para a lógica do jogo e o uso do plugin SweetAlert2 -->
 		<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 		<script>
-			const events = new EventSource(`http://localhost:5000/events`);
+			// Configuração da URL da API
+			const apiUrlWeb = 'https://bingo-libras.onrender.com';
+
+			const events = new EventSource(`${apiUrlWeb}/events`);
 
 			const idxSinalSorteado = [];
 			let sinalSorteado = "";
@@ -215,7 +218,7 @@
 			})
 
 			function iniciarSorteio() {
-				fetch('http://localhost:5000/iniciar_sorteio', {
+				fetch(`${apiUrlWeb}/iniciar_sorteio`, {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',
@@ -247,7 +250,7 @@
 				if (!cartelaCompleta) {
 					return exibirMensagemError('Selecione todos os números da cartela')
 				}
-				fetch('http://localhost:5000/bingo', {
+				fetch(`${apiUrlWeb}/bingo`, {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',
