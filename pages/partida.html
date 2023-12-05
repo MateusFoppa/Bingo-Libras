@@ -185,55 +185,57 @@
 		<script>
 			// Configuração da URL da API
 			const apiUrlWeb = 'https://bingo-libras.onrender.com';
+			// 'http://localhost:5000';
 
 			const events = new EventSource(`${apiUrlWeb}/events`);
 
 			let idxSinalSorteado = [];
-			let sinalSorteado = "";
-
 
 			events.addEventListener('notiticacao', (data) => {
-				console.log(data);
 				const messagebox = JSON.parse(data.data);
 				console.log(messagebox);
-				if (messagebox.number) {
-					sinalSorteado = messagebox.number;
-					if (messagebox.number) {
-						idxSinalSorteado.unshift(parseInt(messagebox.number));
-					}
+
+				if (messagebox.idx && messagebox.sinalBase64) {
+					idxSinalSorteado.unshift(parseInt(messagebox.idx));
+
+					// Cria um elemento de imagem
+					const imgElement = document.createElement('img');
+
+					// Atribui a string base64 à propriedade src do elemento de imagem
+					imgElement.src = `data:image/png;base64,${messagebox.sinalBase64}`;
+
+					document.getElementById('sorteio').innerHTML = '';
 
 					// Obtém o elemento div pelo ID e define o conteúdo HTML
-					document.getElementById('sorteio').innerHTML = JSON.stringify(sinalSorteado);
+					document.getElementById('sorteio').appendChild(imgElement);
 
 					// document.getElementById('messagebox').innerHTML = JSON.stringify(messagebox.msg);
-				} if (messagebox.msg) {
+				} if (messagebox.msg && messagebox.tipo == "bingo_vencedor") {
 					// Obtém o elemento div pelo ID e define o conteúdo HTML
 					document.getElementById('sorteio').textContent = '';
 					exibirMensagem(messagebox.msg, messagebox.jogador);
 					gerarCartela();
 					idxSinalSorteado = [];
-					sinalSorteado = "";
-
+					// Remove display none do button de sorteio
+					document.getElementById('iniciarSorteioButton').style.display = 'flex';
+				} if (messagebox.msg && messagebox.tipo == "bingo_iniciado") {
+					// Adiciona display none do button de sorteio
+					document.getElementById('iniciarSorteioButton').style.display = 'none';
 				}
 			})
 
 			function iniciarSorteio() {
 				fetch(`${apiUrlWeb}/iniciar_sorteio`, {
-					method: 'POST',
+					method: 'GET',
 					headers: {
 						'Content-Type': 'application/json',
 						// Pode ser necessário adicionar outros cabeçalhos, dependendo dos requisitos do seu servidor
-					},
-					body: JSON.stringify({
-						// Se precisar enviar dados no corpo da requisição, adicione-os aqui
-					}),
+					}
 				})
 					.then(response => {
 						if (!response.ok) {
 							throw new Error('Erro ao iniciar o sorteio');
 						}
-						// Remove display none da caixa de sorteio
-						document.getElementById('iniciarSorteioButton').style.display = 'none';
 						console.log('Sorteio iniciado com sucesso!');
 					})
 					.catch(error => {
@@ -329,7 +331,7 @@
 			// Função para selecionar um sinal no quadro do Bingo
 			function selecionarSinal(event) {
 				// Verifica se já foi sorteado um sinal
-				if (!sinalSorteado) {
+				if (!idxSinalSorteado) {
 					exibirMensagemError('Aviso', 'Nenhum sinal sorteado, aguarde o inicio do sorteio.');
 					return;
 				}
