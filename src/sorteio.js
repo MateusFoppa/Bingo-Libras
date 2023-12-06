@@ -4,17 +4,14 @@ const fs = require('fs');
 
 let algemVenceu;
 const numerosSorteados = new Set();
+let sorteioIntervalo;
 
-const iniciarSorteio = (vencedor) => {
-    algemVenceu = vencedor ?? false;
+const iniciarSorteio = () => {
 
-    setInterval(() => {
-        if (!algemVenceu) {
-            const indexSorteado = gerarSinalUnico();
-            const sinalBase64 = converterImagem(indexSorteado);
-
-            myEmitter.emit('bingo_sorteio', indexSorteado, sinalBase64);
-        }
+    sorteioIntervalo = setInterval(() => {
+        const indexSorteado = gerarSinalUnico();
+        const sinalBase64 = converterImagem(indexSorteado);
+        myEmitter.emit('bingo_sorteio', indexSorteado, sinalBase64);
     }, 10000);
 }
 
@@ -24,11 +21,12 @@ function gerarSinalUnico() {
     const numerosDisponiveis = todosOsNumeros.filter(num => !numerosSorteados.has(num));
 
     if (numerosDisponiveis.length === 0) {
-        return;
+        resetSorteio();
     }
 
     const indexSorteado = numerosDisponiveis[Math.floor(Math.random() * numerosDisponiveis.length)];
     numerosSorteados.add(indexSorteado);
+    console.log('idx:', indexSorteado);
     return indexSorteado
 }
 function converterImagem(index) {
@@ -41,6 +39,17 @@ function converterImagem(index) {
         return null;
     }
 }
+
+function resetSorteio(jogadorVencedor) {
+    if (sorteioIntervalo) {
+        clearInterval(sorteioIntervalo);
+    }
+    myEmitter.emit('bingo_vencedor', jogadorVencedor);
+    numerosSorteados.clear();
+    console.log('reset_sorteio');
+}
+
 module.exports = {
-    iniciarSorteio
+    iniciarSorteio,
+    resetSorteio
 };

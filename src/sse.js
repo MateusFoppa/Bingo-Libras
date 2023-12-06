@@ -25,7 +25,6 @@ function sse(req, res, next) {
     // Enviamos os dados JSON para o front-end
     res.write(`data: ${JSON.stringify(jsonData)}`);
     res.write("\n\n");
-    res.end(); // Encerra a resposta após o envio dos dados
   })
 
   myEmitter.on('bingo_sorteio', (indexSorteado, sinalBase64) => {
@@ -52,7 +51,6 @@ function sse(req, res, next) {
     // Enviamos os dados JSON para o front-end
     res.write(`data: ${JSON.stringify(jsonDataInicio)}`);
     res.write("\n\n");
-    res.end(); // Encerra a resposta após o envio dos dados
   })
 }
 
