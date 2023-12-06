@@ -5,14 +5,17 @@ const fs = require('fs');
 let algemVenceu;
 const numerosSorteados = new Set();
 let sorteioIntervalo;
+let sorteando = false;
 
 const iniciarSorteio = () => {
-
-    sorteioIntervalo = setInterval(() => {
-        const indexSorteado = gerarSinalUnico();
-        const sinalBase64 = converterImagem(indexSorteado);
-        myEmitter.emit('bingo_sorteio', indexSorteado, sinalBase64);
-    }, 10000);
+    if (!sorteando) {
+        sorteando = true;
+        sorteioIntervalo = setInterval(() => {
+            const indexSorteado = gerarSinalUnico();
+            const sinalBase64 = converterImagem(indexSorteado);
+            myEmitter.emit('bingo_sorteio', indexSorteado, sinalBase64);
+        }, 10000);
+    } return
 }
 
 function gerarSinalUnico() {
@@ -43,6 +46,8 @@ function converterImagem(index) {
 function resetSorteio(jogadorVencedor) {
     if (sorteioIntervalo) {
         clearInterval(sorteioIntervalo);
+        sorteioIntervalo = null;
+        sorteando = false;
     }
     myEmitter.emit('bingo_vencedor', jogadorVencedor);
     numerosSorteados.clear();
