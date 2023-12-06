@@ -20,7 +20,7 @@ const iniciarSorteio = () => {
 
 function gerarSinalUnico() {
     const maxIndex = 75;
-    const todosOsNumeros = Array.from({ length: maxIndex }, (_, i) => i);
+    const todosOsNumeros = Array.from({ length: maxIndex }, (_, i) => i + 1);
     const numerosDisponiveis = todosOsNumeros.filter(num => !numerosSorteados.has(num));
 
     if (numerosDisponiveis.length === 0) {

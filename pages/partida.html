@@ -332,7 +332,7 @@
 			// Função para gerar um sinal que ainda não foi sorteado
 			function gerarSinalUnico() {
 				const maxIndex = 75;
-				const todosOsNumeros = Array.from({ length: maxIndex }, (_, i) => i);
+				const todosOsNumeros = Array.from({ length: maxIndex }, (_, i) => i + 1);
 				const numerosDisponiveis = todosOsNumeros.filter(num => !numerosCartela.has(num));
 
 				const indexSorteado = numerosDisponiveis[Math.floor(Math.random() * numerosDisponiveis.length)];
