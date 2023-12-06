@@ -224,7 +224,7 @@
 					document.getElementById('sorteio').appendChild(imgElement);
 
 					// document.getElementById('messagebox').innerHTML = JSON.stringify(messagebox.msg);
-				} if (messagebox.msg && messagebox.tipo == "bingo_vencedor") {
+				} if (messagebox.msg && messagebox.tipo == "bingo_vencedor" && messagebox.jogador) {
 					// Obtém o elemento div pelo ID e define o conteúdo HTML
 					document.getElementById('sorteio').textContent = '';
 					exibirMensagem(messagebox.msg, messagebox.jogador);
