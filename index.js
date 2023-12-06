@@ -2,7 +2,7 @@ const express = require('express')
 require('dotenv').config();
 const app = express()
 const port = process.env.PORT || 5000;
-const { iniciarSorteio } = require('./src/sorteio');
+const { iniciarSorteio, resetSorteio } = require('./src/sorteio');
 const { sse, myEmitter } = require('./src/sse');
 
 app.use(express.json());
@@ -23,8 +23,7 @@ app.get('/partida', (req, res) => {
 app.post('/bingo', (req, res) => {
   const nomeJogador = req.body.nomeJogador ?? "";
   try {
-    iniciarSorteio(nomeJogador);
-    myEmitter.emit('bingo_vencedor', nomeJogador);
+    resetSorteio(nomeJogador);
   } catch (error) {
     console.error('Erro:', error.message);
     res.status(500).send('Algo deu errado!');
@@ -35,7 +34,7 @@ app.post('/bingo', (req, res) => {
 app.get('/iniciar_sorteio', (req, res) => {
   try {
     myEmitter.emit('bingo_iniciado');
-    iniciarSorteio(false)
+    iniciarSorteio()
 
   } catch (error) {
     console.error('Erro:', error.message);

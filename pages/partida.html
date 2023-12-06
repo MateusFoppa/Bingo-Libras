@@ -26,7 +26,7 @@
 				align-items: center;
 				justify-content: center;
 				height: 100vh;
-
+				overflow: hidden;
 			}
 
 			.container {
@@ -37,6 +37,7 @@
 				padding: 20px;
 				border-radius: 8px;
 				box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+
 			}
 
 			h1 {
@@ -46,6 +47,7 @@
 			.board-container {
 				display: flex;
 				margin-top: 20px;
+				align-items: center;
 			}
 
 			/* Estilos específicos para dispositivos com largura de tela até 600 pixels (ajuste conforme necessário) */
@@ -159,14 +161,14 @@
 			<!-- Título do jogo -->
 			<h1>Bingo em Libras</h1>
 			<h4 id="nome-jogador"></h4>
+			<button id="iniciarSorteioButton" onclick={iniciarSorteio()}>Iniciar jogo</button>
 
 			<!-- Container para o globo e o quadro do Bingo -->
 			<div class="board-container">
 				<!-- Globo de Bingo -->
+
+
 				<div class="caixa_de_sorteio" id="caixa_de_sorteio">
-					<div>
-						<button id="iniciarSorteioButton" onclick={iniciarSorteio()}>Iniciar jogo</button>
-					</div>
 					<div id="sinal-sorteado">
 						<h1>Sinal Sorteado</h1>
 						<div id="sorteio">
@@ -214,6 +216,8 @@
 					// Obtém o elemento div pelo ID e define o conteúdo HTML
 					document.getElementById('sorteio').textContent = '';
 					exibirMensagem(messagebox.msg, messagebox.jogador);
+					//Limpar a memória
+					resetSorteio()
 					gerarCartela();
 					idxSinalSorteado = [];
 					// Remove display none do button de sorteio
@@ -221,6 +225,10 @@
 				} if (messagebox.msg && messagebox.tipo == "bingo_iniciado") {
 					// Adiciona display none do button de sorteio
 					document.getElementById('iniciarSorteioButton').style.display = 'none';
+					exibirMensagem(messagebox.msg);
+					//Limpar a memória
+					resetSorteio()
+					gerarCartela()
 				}
 			})
 
@@ -282,6 +290,8 @@
 			console.log(nomeJogador);
 			document.getElementById('nome-jogador').innerText = `Jogador: ${nomeJogador}`;
 
+
+
 			// Função para gerar uma nova cartela de Bingo
 			function gerarCartela() {
 				// Obtém o elemento do quadro do Bingo
@@ -300,6 +310,7 @@
 
 				// Remove display none da caixa de sorteio
 				document.getElementById('caixa_de_sorteio').style.display = 'flex';
+
 			}
 
 			// Função para gerar um sinal que ainda não foi sorteado
@@ -308,17 +319,15 @@
 				const todosOsNumeros = Array.from({ length: maxIndex }, (_, i) => i);
 				const numerosDisponiveis = todosOsNumeros.filter(num => !numerosCartela.has(num));
 
-				if (numerosDisponiveis.length === 0) {
-					reiniciarSorteio();
-				}
-
 				const indexSorteado = numerosDisponiveis[Math.floor(Math.random() * numerosDisponiveis.length)];
 				numerosCartela.add(indexSorteado);
 
 				return indexSorteado;
 			}
 
-			gerarCartela();
+			function resetSorteio() {
+				numerosCartela.clear();
+			}
 
 			// Função para desabilitar a seleção no quadro do Bingo
 			function desabilitarSelecaoAtual() {
