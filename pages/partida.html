@@ -4,7 +4,7 @@
 <head>
 	<meta charset='utf-8'>
 	<meta http-equiv='X-UA-Compatible' content='IE=edge'>
-	<title>Page Title</title>
+	<title>Sorteio</title>
 	<meta name='viewport' content='width=device-width, initial-scale=1'>
 	<!-- <link rel="stylesheet" href="./index.css"> -->
 
@@ -40,25 +40,31 @@
 
 			}
 
-			h1 {
+			h1,
+			h4 {
 				color: #333;
+				margin: 8px;
 			}
 
 			.board-container {
 				display: flex;
-				margin-top: 20px;
+				margin-top: 5px;
 				align-items: center;
 			}
 
 			/* Estilos específicos para dispositivos com largura de tela até 600 pixels (ajuste conforme necessário) */
 			@media screen and (max-width: 600px) {
 				.board-container {
-					margin-top: 10px;
+					margin-top: 5px;
 					display: flex;
 					flex-direction: column;
 				}
 			}
 
+			.cartela {
+				display: none;
+				flex-direction: column;
+			}
 
 			.board {
 				display: grid;
@@ -155,13 +161,19 @@
 			button:hover {
 				background-color: #45a049;
 			}
+
+			#bingoButton {
+				justify-content: center;
+				margin-left: 20px;
+				margin-right: 20px;
+			}
 		</style>
 		<!-- Conteúdo principal do jogo -->
 		<div class="container">
 			<!-- Título do jogo -->
 			<h1>Bingo em Libras</h1>
 			<h4 id="nome-jogador"></h4>
-			<button id="iniciarSorteioButton" onclick={iniciarSorteio()}>Iniciar jogo</button>
+			<button id="iniciarSorteioButton" onclick={iniciarSorteio()}>Iniciar Sorteio</button>
 
 			<!-- Container para o globo e o quadro do Bingo -->
 			<div class="board-container">
@@ -174,11 +186,11 @@
 						<div id="sorteio">
 						</div>
 					</div>
-					<div>
-						<button id="bingoButton" onclick={bingo()}>BINGO!</button>
-					</div>
 				</div>
-				<div id="bingo-board" class="board" onclick="selecionarSinal(event)"></div>
+				<div class="cartela" id="cartela">
+					<div id="bingo-board" class="board" onclick="selecionarSinal(event)"></div>
+					<button id="bingoButton" onclick={bingo()}>BINGO!</button>
+				</div>
 
 			</div>
 		</div>
@@ -186,8 +198,8 @@
 		<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 		<script>
 			// Configuração da URL da API
-			const apiUrlWeb = 'https://bingo-libras.onrender.com';
-			// 'http://localhost:5000';
+			const apiUrlWeb = 'http://localhost:5000';
+			// 'https://bingo-libras.onrender.com';
 
 			const events = new EventSource(`${apiUrlWeb}/events`);
 
@@ -294,6 +306,8 @@
 
 			// Função para gerar uma nova cartela de Bingo
 			function gerarCartela() {
+				// Remove display none da cartela
+				document.getElementById('cartela').style.display = 'flex';
 				// Obtém o elemento do quadro do Bingo
 				const bingoBoard = document.getElementById('bingo-board');
 				// Limpa o conteúdo do quadro e reinicia as variáveis
@@ -310,6 +324,8 @@
 
 				// Remove display none da caixa de sorteio
 				document.getElementById('caixa_de_sorteio').style.display = 'flex';
+
+
 
 			}
 
